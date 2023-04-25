@@ -1,0 +1,380 @@
+________________________________________________________________________________________________________________________________________________________________
+CREATION TABLES
+________________________________________________________________________________________________________________________________________________________________
+CREATE TABLE analyse
+( 
+  id_analyse number(10)  NOT NULL,
+  nom_analyse varchar2(50) NOT NULL
+);
+
+CREATE TABLE typeAnalyse
+( 
+  typeAnalyse varchar2(50)  NOT NULL,
+  description varchar2(50) NOT NULL
+);
+
+CREATE TABLE wilaya
+( 
+  code_wilaya number(10)  NOT NULL,
+  nomWilaya varchar2(50) NOT NULL,
+  CONSTRAINT wilaya PRIMARY KEY (code_wilaya)
+);
+
+CREATE TABLE specialite
+( 
+  id_spec number(10)  NOT NULL,
+  nom_specialite varchar2(50) NOT NULL,
+  CONSTRAINT specialite PRIMARY KEY (id_spec)
+);
+
+CREATE TABLE grade
+( 
+  titre varchar2(50)  NOT NULL,
+  description varchar2(50) NOT NULL,
+  CONSTRAINT grade PRIMARY KEY (titre)
+);
+
+CREATE TABLE hopital
+( 
+  code_hopital number(10)  NOT NULL,
+  nom_hopital varchar2(50) NOT NULL,
+  id_wilaya number(10) NOT NULL,
+  CONSTRAINT hopital PRIMARY KEY (code_hopital),
+  CONSTRAINT fk_wilaya
+    FOREIGN KEY (id_wilaya)
+    REFERENCES wilaya(code_wilaya)
+);
+
+CREATE TABLE service
+( 
+  code_service number(10)  NOT NULL,
+  nom_service varchar2(50) NOT NULL,
+  code_hopital number(10) NOT NULL,
+  CONSTRAINT service PRIMARY KEY (code_service),
+  CONSTRAINT fk_hopital
+    FOREIGN KEY (code_hopital)
+    REFERENCES hopital(code_hopital)
+);
+
+
+CREATE TABLE ville
+( 
+  codeVille number(10)  NOT NULL,
+  nom_ville varchar2(50) NOT NULL,
+  id_wilaya number(10) NOT NULL,
+  CONSTRAINT ville PRIMARY KEY (codeVille),
+  CONSTRAINT fk_wilaya2
+    FOREIGN KEY (id_wilaya)
+    REFERENCES wilaya(code_wilaya)
+);
+
+CREATE TABLE medecin
+( 
+  codeMedecin number(10)  NOT NULL,
+  nomMedecin varchar2(50) NOT NULL,
+  codeGrade number(10) NOT NULL,
+  libelleGrade varchar2(50) NOT NULL,
+  codeSpecialite number(10) NOT NULL,
+  libelleSpecialite varchar2(50) NOT NULL,
+  CONSTRAINT medecin PRIMARY KEY (codeMedecin)
+);
+
+CREATE TABLE patient
+( 
+  codePat number(10)  NOT NULL,
+  nomPat varchar2(50) NOT NULL,
+  sexePat varchar2(50) NOT NULL,
+  codeVille number(10) NOT NULL,
+  nomVille varchar2(50) NOT NULL,
+  codeWilaya number(10) NOT NULL,
+  nomWilaya varchar2(50) NOT NULL,
+  CONSTRAINT patient PRIMARY KEY (codePat)
+);
+
+CREATE TABLE hospitalisation
+( 
+  id_hospitalisation number(10)  NOT NULL,
+  date_hospitalisation  date NOT NULL,
+  nombre_jour number(10)  NOT NULL,
+  tarif number(10) NOT NULL,
+  id_patient number(10) NOT NULL,
+  id_service number(10) NOT NULL,
+  id_medecin number(10) NOT NULL,
+  CONSTRAINT hospitalisation PRIMARY KEY (id_hospitalisation),
+  CONSTRAINT fk_patient
+    FOREIGN KEY (id_patient)
+    REFERENCES patient(codePat),
+  CONSTRAINT fk_service
+    FOREIGN KEY (id_service)
+    REFERENCES service(code_service),
+  CONSTRAINT fk_medecin
+    FOREIGN KEY (id_medecin)
+    REFERENCES medecin(codeMedecin)
+);
+________________________________________________________________________________________________________________________________________________________________
+
+________________________________________________________________________________________________________________________________________________________________
+
+
+________________________________________________________________________________________________________________________________________________________________
+REMPLIR TABLES
+________________________________________________________________________________________________________________________________________________________________
+
+--wilaya---
+DECLARE
+l char(10);
+I number;
+begin
+for i in 1..48 loop
+Select dbms_random.string('U', 8) into l from dual;
+insert into wilaya values(i,l);
+end loop;
+commit;
+end;
+/
+
+--analyse--
+DECLARE
+l char(10);
+I number;
+begin
+for i in 1..400325 loop
+Select dbms_random.string('U', 8) into l from dual;
+insert into analyse values(i,l);
+end loop;
+commit;
+end;
+/
+
+--typeAnalyse--
+DECLARE
+l char(10);
+d char(40);
+I number;
+begin
+for i in 1..4000 loop
+Select dbms_random.string('U', 8) into l from dual;
+Select dbms_random.string('U', 8) into d from dual;
+insert into typeAnalyse values(l,d);
+end loop;
+commit;
+end;
+/
+
+
+--specialite --
+insert into specialite values(1,'Cardiologie');
+insert into specialite values(2,'Psychiatrie');
+insert into specialite values(3,'Allergologie');
+insert into specialite values(4,'Ophtalmologie');
+insert into specialite values(5,'Gastrologie');
+insert into specialite values(6,'Urologie');
+insert into specialite values(7,'Chirurgie');
+insert into specialite values(8,'Radiologie');
+insert into specialite values(9,'Dermatologie');
+insert into specialite values(10,'Neurologie');
+
+--grade-- 
+insert into grade values('Medecin interne', 'diagnostic et a la prise en charge glo');
+insert into grade values('Medecin d"urgence', 'La medecine d"urgence rassemble les resso');
+insert into grade values('Medecin Attache', 'travaille a l"hopital en tant que contractuel');
+insert into grade values('Medecin Vacataire', 'effectue des vacations a l"hopital');
+insert into grade values('Chef de service', 'PH qui a la responsabilite medicale d"un se');
+
+---------
+
+--hopital-- 
+DECLARE
+l char(10);
+m number;
+I number;
+begin
+for i in 1..113 loop
+Select dbms_random.string('U', 8) into l from dual;
+Select floor(dbms_random.value(1, 48)) into m from dual;
+insert into hopital values(i,l,m);
+end loop;
+commit;
+end;
+/
+
+--service--
+DECLARE
+l char(10);
+m number;
+I number;
+begin
+for i in 1..2212 loop
+Select dbms_random.string('U', 8) into l from dual;
+Select floor(dbms_random.value(1, 113)) into m from dual;
+insert into service values(i,l,m);
+end loop;
+commit;
+end;
+/
+
+--ville--
+DECLARE
+l char(10);
+m number;
+I number;
+begin
+for i in 1..330 loop
+Select dbms_random.string('U', 8) into l from dual;
+Select floor(dbms_random.value(1, 48)) into m from dual; 
+insert into ville values(i,l,m);
+end loop;
+commit;
+end;
+/
+
+--medecin--
+DECLARE
+l char(10);
+g number;
+lg char(10);
+s number;
+ls char(10);
+I number;
+begin
+for i in 1..12300 loop
+Select dbms_random.string('U', 8) into l from dual;
+Select floor(dbms_random.value(1, 5)) into g from dual;
+Select dbms_random.string('U', 8) into lg from dual;
+Select floor(dbms_random.value(1, 5)) into s from dual;
+Select dbms_random.string('U', 8) into ls from dual;
+insert into medecin values(i,l,g,lg,s,ls);
+end loop;
+commit;
+end;
+/
+
+
+--patient--
+DECLARE
+l char(10);
+sex char(10);
+g number;
+lg char(10);
+s number;
+ls char(10);
+I number;
+begin
+for i in 1..110080 loop
+Select dbms_random.string('U', 8) into l from dual;
+Select dbms_random.string('U', 5) into sex from dual;
+Select floor(dbms_random.value(1, 5)) into g from dual;
+Select dbms_random.string('U', 8) into lg from dual;
+Select floor(dbms_random.value(1, 48)) into s from dual;
+Select dbms_random.string('U', 8) into ls from dual;
+insert into patient values(i,l,sex,g,lg,s,ls);
+end loop;
+commit;
+end;
+/
+
+
+
+--hospitalisation--
+DECLARE
+d date; nbj number; tarif number; pat number; serv number; med number;i number;
+BEGIN
+FOR i IN 1..710314 LOOP
+SELECT TO_DATE( TRUNC( DBMS_RANDOM.VALUE(TO_CHAR(DATE '2014-01-01','J')
+
+,TO_CHAR(DATE '2019-12-31','J') )
+),'J'
+) into d FROM DUAL;
+SELECT trunc(DBMS_RANDOM.VALUE(5000, 100000 ),2) into nbj FROM DUAL;
+SELECT floor(DBMS_RANDOM.VALUE(1, 3000 ) ) into tarif FROM DUAL;
+SELECT floor(DBMS_RANDOM.VALUE(1, 110080) ) into pat FROM DUAL;
+SELECT floor(DBMS_RANDOM.VALUE(1, 2212) ) into serv FROM DUAL;
+
+SELECT floor(DBMS_RANDOM.VALUE(1, 12300) ) into med FROM DUAL;
+INSERT INTO hospitalisation VALUES (i, d,nbj, tarif, pat, serv, med);
+END LOOP;
+COMMIT;
+END;
+/
+________________________________________________________________________________________________________________________________________________________________
+
+________________________________________________________________________________________________________________________________________________________________
+________________________________________________________________________________________________________________________________________________________________
+REQUETES
+________________________________________________________________________________________________________________________________________________________________
+
+--qst1--
+update hopital set nom_hopital = 'hopital Mustapha', ID_wilaya = 16 WHERE code_hopital = 1;
+update service set nom_service = 'Cardiologie' WHERE code_hopital = 1 AND code_service= 1542;
+
+SELECT codePat,nomPat FROM patient p 
+    left outer JOIN hospitalisation h ON p.codePat = h.id_patient
+    left outer JOIN service s on s.code_service = h.id_service
+    left outer JOIN hopital h2 on s.code_hopital = h2.code_hopital
+    WHERE h.date_hospitalisation >= TO_DATE('01/01/15', 'DD/MM/YY') and h.date_hospitalisation <= TO_DATE('30/05/18', 'DD/MM/YY')
+    and s.nom_service = 'Cardiologie'
+    and h2.nom_hopital = 'hopital Mustapha';
+
+--qst2--
+update wilaya set nomWilaya = 'Oran' WHERE code_wilaya = 31;
+
+SELECT COUNT(*) FROM patient p Left outer JOIN 
+      hospitalisation h ON p.codePat = h.id_patient
+      left outer JOIN service s on s.code_service = h.id_service
+      WHERE p.codeWilaya = 31 
+      and s.code_hopital = 4;
+
+--qst3--
+SELECT h.code_hopital,h.nom_hopital,COUNT(s.code_service) AS nbr
+FROM hopital h LEFT JOIN service s ON h.code_hopital = s.code_hopital 
+GROUP BY h.nom_hopital,h.code_hopital
+order by h.code_hopital;
+
+--qst4--
+SELECT h.code_hopital,h.nom_hopital,s.nom_service,sum(ho.tarif) as CA from hopital h 
+JOIN service s on h.code_hopital = s.code_hopital 
+JOIN hospitalisation ho ON ho.ID_service = s.code_service
+WHERE ho.date_hospitalisation >='01/01/2017' AND ho.date_hospitalisation<'01/01/2018'
+GROUP BY h.code_hopital,h.nom_hopital,s.nom_service
+ORDER BY h.code_hopital;
+
+--qst5--
+SELECT h.code_hopital,h.nom_hopital,count(ho.id_hospitalisation)as nmbrhost
+FROM hopital h JOIN service s on h.code_hopital = s.code_hopital
+JOIN hospitalisation ho on ho.ID_service = s.code_service
+JOIN patient p on p.CodePat=ho.ID_patient
+WHERE ho.date_hospitalisation >='01/01/2015' and ho.date_hospitalisation<'30/05/2018'
+GROUP BY h.code_hopital,h.nom_hopital
+ORDER BY h.code_hopital;
+
+--qst6--
+SELECT h.code_hopital,h.nom_hopital,count(ho.id_hospitalisation)as nmbrhost
+FROM hopital h JOIN service s on h.code_hopital = s.code_hopital
+JOIN hospitalisation ho on ho.ID_service = s.code_service
+JOIN patient p on p.CodePat=ho.ID_patient
+WHERE ho.date_hospitalisation >='01/01/2015' and ho.date_hospitalisation<'30/05/2018'
+GROUP BY h.code_hopital,h.nom_hopital
+HAVING COUNT(ho.id_hospitalisation)>10000
+ORDER BY h.code_hopital;
+--qst7--
+SELECT h.code_hopital,h.nom_hopital,max(ho.id_hospitalisation)as maxhost
+FROM hopital h JOIN service s on h.code_hopital = s.code_hopital
+JOIN hospitalisation ho on ho.ID_service = s.code_service
+JOIN patient p on p.CodePat=ho.ID_patient
+WHERE ho.date_hospitalisation >='01/01/2015' and ho.date_hospitalisation<'30/05/2018'
+GROUP BY h.code_hopital,h.nom_hopital
+HAVING COUNT(ho.id_hospitalisation)>10000
+ORDER BY h.code_hopital;
+
+--qst8--
+CREATE VIEW q8 as 
+SELECT h.code_hopital,h.nom_hopital,max(ho.id_hospitalisation)as maxhost
+FROM hopital h JOIN service s on h.code_hopital = s.code_hopital
+JOIN hospitalisation ho on ho.ID_service = s.code_service
+JOIN patient p on p.CodePat=ho.ID_patient
+WHERE ho.date_hospitalisation >='01/01/2015' and ho.date_hospitalisation<'30/05/2018'
+GROUP BY h.code_hopital,h.nom_hopital
+HAVING COUNT(ho.id_hospitalisation)>10000
+ORDER BY h.code_hopital;
+
+

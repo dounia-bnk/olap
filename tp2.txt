@@ -1,0 +1,78 @@
+
+--qst1--
+CREATE MATERIALIZED VIEW VM1
+BUILD IMMEDIATE 
+REFRESH COMPLETE ON DEMAND
+AS SELECT ho.id_hospitalisation,ho.date_hospitalisation 
+FROM hospitalisation ho 
+WHERE ho.id_service ='16';
+S_MVIEW.REFRESH('V2');
+
+--qst2--
+CREATE MATERIALIZED VIEW LOG ON scott.hospitalisation
+TABLESPACE users
+WITH PRIMARY KEY
+INCLUDING NEW VALUES;
+
+CREATE MATERIALIZED VIEW VM2
+BUILD IMMEDIATE 
+REFRESH FAST ON DEMAND
+AS SELECT ho.id_hospitalisation,ho.date_hospitalisation 
+FROM hospitalisation ho 
+WHERE ho.id_service ='16';
+
+--qst3--
+Insertion:
+INSERT INTO Hospitalisation values (710315,'21/02/2022',30,15000,20,16,55);
+	
+execute DBMS_MVIEW.REFRESH('VM1');
+execute DBMS_MVIEW.REFRESH('VM2');
+
+Suppresion:
+DELETE FROM Hospitalisation where ID_hospitalisation=710315; 
+
+execute DBMS_MVIEW.REFRESH('VM1');
+execute DBMS_MVIEW.REFRESH('VM2');
+
+Modification:
+UPDATE Hospitalisation set ID_Service = 15 WHERE date_hospitalisation='21/02/2022';
+
+execute DBMS_MVIEW.REFRESH('VM1');
+execute DBM
+--qst4--
+CREATE MATERIALIZED VIEW LOG ON scott.service
+TABLESPACE users
+WITH PRIMARY KEY
+INCLUDING NEW VALUES;
+CREATE MATERIALIZED VIEW VM3
+BUILD DEFERRED
+REFRESH COMPLETE ON COMMIT   
+AS SELECT ho.id_hospitalisation,ho.date_hospitalisation
+FROM hospitalisation ho JOIN service s ON ho.id_service = s.code_service
+WHERE s.code_hopital='2';
+
+
+--qst5--
+CREATE MATERIALIZED VIEW VM4
+BUILD IMMEDIATE
+REFRESH COMPLETE ON COMMIT
+AS 
+SELECT s.code_service,count(ho.id_hospitalisation)as nmbrhost
+FROM service s JOIN hospitalisation ho ON ho.id_service = s.code_service
+GROUP BY code_service; 
+
+--qst6--
+CREATE MATERIALIZED VIEW VM5
+BUILD DEFERRED
+REFRESH FAST ON COMMIT 
+AS SELECT ho.ID_hospitalisation,ho.date_hospitalisation FROM Hospitalisation ho, Hopital h, Service s 
+where s.CodeHopital=h.CodeHopital and s.CodeService=ho.ID_service and  h.CodeHopital=2;
+
+execute DBMS_MVIEW.REFRESH('VM3');
+
+CREATE MATERIALIZED VIEW VM6
+BUILD IMMEDIATE
+REFRESH FAST ON COMMIT
+AS SELECT ID_service, COUNT(ID_hospitalisation) as Nb_hospitalisation from Hospitalisation
+GROUP BY ID_service;
+
